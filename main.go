@@ -27,7 +27,10 @@ func showPrompt() {
 	host, _ := os.Hostname()
 	wd, _ := os.Getwd()
 
-	fmt.Printf("%s@%s %s > ", u.Username, host, wd)
+	userAndHost := blue(u.Username + "@" + host)
+	wd = yellowWithBlueBG(wd)
+
+	fmt.Printf("%s %s > ", userAndHost, wd)
 }
 
 func main() {
