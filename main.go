@@ -20,6 +20,20 @@ func executeInput(input string) error {
 		return err
 	}
 
+	if args[0] == "export" {
+		// args = ["export", "FOO=bar"]
+		kv := strings.Split(args[1], "=")
+		key, val := kv[0], kv[1]
+		err := os.Setenv(key, val)
+		return err
+	}
+
+	if args[0] == "unset" {
+		// args = ["unset", "FOO"]
+		err := os.Unsetenv(args[1])
+		return err
+	}
+
 	cmd := exec.Command(args[0], args[1:]...)
 
 	cmd.Stdin = os.Stdin
