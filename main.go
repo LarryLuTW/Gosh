@@ -10,10 +10,17 @@ import (
 	"strings"
 )
 
+func parseArgs(input string) []string {
+	if strings.HasPrefix(input, "alias") {
+		return strings.SplitN(input, " ", 2)
+	}
+	return strings.Split(input, " ")
+}
+
 func executeInput(input string) error {
 	input = os.ExpandEnv(input)
 
-	args := strings.Split(input, " ")
+	args := parseArgs(input)
 
 	if args[0] == "cd" {
 		err := os.Chdir(args[1])
