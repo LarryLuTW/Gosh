@@ -19,12 +19,30 @@ func parseArgs(input string) []string {
 
 func executeInput(input string) error {
 	input = os.ExpandEnv(input)
+	input = expandAlias(input)
 
 	args := parseArgs(input)
 
 	if args[0] == "cd" {
 		err := os.Chdir(args[1])
 		return err
+	}
+
+	if args[0] == "alias" {
+		// args = ["alias", "ls='ls -l'"]
+		// kv = ["ls", "'ls -l'"]
+		kv := strings.Split(args[1], "=")
+		// key = "ls", val = "ls -l"
+		key, val := kv[0], strings.Trim(kv[1], "'")
+		setAlias(key, val)
+		return nil
+	}
+
+	if args[0] == "unalias" {
+		// args = ["unalias", "ls"]
+		key := args[1]
+		unsetAlias(key)
+		return nil
 	}
 
 	if args[0] == "export" {
