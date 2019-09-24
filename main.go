@@ -19,7 +19,12 @@ func parseArgs(input string) []string {
 
 func executeInput(input string) error {
 	input = os.ExpandEnv(input)
-	input = expandAlias(input)
+
+	if strings.HasPrefix(input, `\`) {
+		input = input[1:]
+	} else {
+		input = expandAlias(input)
+	}
 
 	args := parseArgs(input)
 
