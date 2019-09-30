@@ -17,6 +17,22 @@ func parseArgs(input string) []string {
 	return strings.Split(input, " ")
 }
 
+func lookCommand(cmd string) {
+	value := aliasTable[cmd]
+	if value != "" {
+		fmt.Printf("%s: aliased to %s\n", cmd, value)
+		return
+	}
+
+	value, err := exec.LookPath(cmd)
+	if err == nil {
+		fmt.Printf("%s: %s\n", cmd, value)
+		return
+	}
+
+	fmt.Printf("%s NOT FOUND\n", cmd)
+}
+
 func executeInput(input string) error {
 	input = os.ExpandEnv(input)
 	input = expandWildcardInCmd(input)
@@ -28,6 +44,13 @@ func executeInput(input string) error {
 	}
 
 	args := parseArgs(input)
+
+	if args[0] == "which" {
+		for _, cmd := range args[1:] {
+			lookCommand(cmd)
+		}
+		return nil
+	}
 
 	if args[0] == "cd" {
 		err := os.Chdir(args[1])
