@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"os/exec"
@@ -109,7 +110,29 @@ func showPrompt() {
 	fmt.Printf("%s %s > ", userAndHost, wd)
 }
 
+func initialize() {
+	homeDir, _ := os.UserHomeDir()
+	file, err := os.Open(homeDir + "/.goshrc")
+	if err != nil {
+		return
+	}
+
+	goshrcReader := bufio.NewReader(file)
+
+	for {
+		input, err := goshrcReader.ReadString('\n')
+		if err == io.EOF {
+			return
+		}
+
+		input = strings.TrimSpace(input)
+		executeInput(input)
+	}
+}
+
 func main() {
+	initialize()
+
 	stdin := bufio.NewReader(os.Stdin)
 
 	for {
