@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"os/exec"
 	"os/user"
@@ -89,9 +88,22 @@ func executeInput(input string) error {
 		return err
 	}
 
+	inputStream := os.Stdin
+
+	if len(args) > 2 && args[len(args)-2] == "<" {
+		filename := args[len(args)-1]
+		file, err := os.Open(filename)
+		if err != nil {
+			return err
+		}
+
+		inputStream = file
+		args = args[:len(args)-2]
+	}
+
 	cmd := exec.Command(args[0], args[1:]...)
 
-	cmd.Stdin = os.Stdin
+	cmd.Stdin = inputStream
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
@@ -143,7 +155,7 @@ func main() {
 
 		err := executeInput(input)
 		if err != nil {
-			log.Println(err)
+			fmt.Println(err)
 		}
 	}
 }
