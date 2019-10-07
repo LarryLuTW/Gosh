@@ -12,6 +12,8 @@ import (
 	"syscall"
 )
 
+var currentCmd *exec.Cmd
+
 func parseArgs(input string) []string {
 	if strings.HasPrefix(input, "alias") {
 		return strings.SplitN(input, " ", 2)
@@ -109,7 +111,10 @@ func executeInput(input string) error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
+	currentCmd = cmd
 	err := cmd.Run()
+	currentCmd = nil
+
 	return err
 }
 
@@ -155,7 +160,12 @@ func main() {
 	handleSignals := func() {
 		for {
 			sig := <-signalCh
-			fmt.Println("Received signal:", sig)
+			if currentCmd != nil {
+				currentCmd.Process.Signal(sig)
+			} else {
+				fmt.Println()
+				showPrompt()
+			}
 		}
 	}
 
