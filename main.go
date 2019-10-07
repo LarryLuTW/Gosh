@@ -6,8 +6,10 @@ import (
 	"io"
 	"os"
 	"os/exec"
+	"os/signal"
 	"os/user"
 	"strings"
+	"syscall"
 )
 
 func parseArgs(input string) []string {
@@ -146,6 +148,18 @@ func main() {
 	initialize()
 
 	stdin := bufio.NewReader(os.Stdin)
+
+	signalCh := make(chan os.Signal)
+	signal.Notify(signalCh, syscall.SIGINT)
+
+	handleSignals := func() {
+		for {
+			sig := <-signalCh
+			fmt.Println("Received signal:", sig)
+		}
+	}
+
+	go handleSignals()
 
 	for {
 		showPrompt()
