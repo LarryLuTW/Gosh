@@ -49,6 +49,14 @@ func executeInput(input string) error {
 
 	args := parseArgs(input)
 
+	shouldRunInBackground := false
+	inputStream := os.Stdin
+	if args[len(args)-1] == "&" {
+		shouldRunInBackground = true
+		inputStream = nil
+		args = args[:len(args)-1]
+	}
+
 	if args[0] == "which" {
 		for _, cmd := range args[1:] {
 			lookCommand(cmd)
@@ -92,8 +100,6 @@ func executeInput(input string) error {
 		return err
 	}
 
-	inputStream := os.Stdin
-
 	if len(args) > 2 && args[len(args)-2] == "<" {
 		filename := args[len(args)-1]
 		file, err := os.Open(filename)
@@ -110,6 +116,11 @@ func executeInput(input string) error {
 	cmd.Stdin = inputStream
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
+
+	if shouldRunInBackground {
+		err := cmd.Start()
+		return err
+	}
 
 	currentCmd = cmd
 	err := cmd.Run()
