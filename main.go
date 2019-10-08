@@ -8,8 +8,10 @@ import (
 	"os/exec"
 	"os/signal"
 	"os/user"
+	"strconv"
 	"strings"
 	"syscall"
+	"time"
 )
 
 var currentCmd *exec.Cmd
@@ -48,6 +50,12 @@ func executeInput(input string) error {
 	}
 
 	args := parseArgs(input)
+
+	timeout := 0
+	if strings.HasPrefix(args[0], "timeout=") {
+		timeout, _ = strconv.Atoi(args[0][8:])
+		args = args[1:]
+	}
 
 	shouldRunInBackground := false
 	inputStream := os.Stdin
@@ -120,6 +128,13 @@ func executeInput(input string) error {
 	if shouldRunInBackground {
 		err := cmd.Start()
 		return err
+	}
+
+	if timeout != 0 {
+		go func() {
+			time.Sleep(time.Duration(timeout) * time.Second)
+			cmd.Process.Signal(syscall.SIGINT)
+		}()
 	}
 
 	currentCmd = cmd
